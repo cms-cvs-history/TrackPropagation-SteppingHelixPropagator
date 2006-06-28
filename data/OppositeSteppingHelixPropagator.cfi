@@ -1,0 +1,15 @@
+es_module OppositeSteppingHelixPropagator = SteppingHelixPropagatorESProducer
+{
+    string ComponentName = "SteppingHelixPropagatorOpposite"
+
+    //somewhat misleading parameter .. can be ignored in 
+    //the current implementation (070pre5)
+    string PropagationDirection = "oppositeToMomentum"
+
+    bool debug = false
+    bool AssumeNoMaterial = false
+    bool NoErrorPropagation = false
+
+    //This sort of works but assumes a measurement at propagation origin  
+    bool ApplyRadX0Correction = true
+}
