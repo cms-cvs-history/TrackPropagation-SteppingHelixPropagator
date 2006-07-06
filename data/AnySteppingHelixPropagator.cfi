@@ -4,7 +4,7 @@ es_module AnySteppingHelixPropagator = SteppingHelixPropagatorESProducer
 
     string PropagationDirection = "anyDirection"
 
-    bool debug = true
+    bool debug = false
     bool AssumeNoMaterial = false
     bool NoErrorPropagation = false
 
