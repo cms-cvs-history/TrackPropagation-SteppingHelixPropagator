@@ -2,8 +2,6 @@ es_module SteppingHelixPropagator = SteppingHelixPropagatorESProducer
 {
     string ComponentName = "SteppingHelixPropagator"
 
-    //somewhat misleading parameter .. can be ignored in 
-    //the current implementation (070pre5)
     string PropagationDirection = "alongMomentum"
 
     bool debug = false
