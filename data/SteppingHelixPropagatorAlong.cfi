@@ -1,0 +1,13 @@
+es_module SteppingHelixPropagator = SteppingHelixPropagatorESProducer
+{
+    string ComponentName = "SteppingHelixPropagatorAlong"
+
+    string PropagationDirection = "alongMomentum"
+
+    bool debug = false
+    bool AssumeNoMaterial = false
+    bool NoErrorPropagation = false
+
+    //This sort of works but assumes a measurement at propagation origin  
+    bool ApplyRadX0Correction = true
+}
