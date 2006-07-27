@@ -1,4 +1,4 @@
-es_module AnySteppingHelixPropagator = SteppingHelixPropagatorESProducer
+es_module SteppingHelixPropagatorAny = SteppingHelixPropagatorESProducer
 {
     string ComponentName = "SteppingHelixPropagatorAny"
 
