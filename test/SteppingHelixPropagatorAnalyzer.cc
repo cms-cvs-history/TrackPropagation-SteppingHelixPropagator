@@ -17,7 +17,7 @@ positions of a muon in the detector.
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagatorAnalyzer.cc,v 1.11 2007/02/05 19:20:32 slava77 Exp $
+// $Id: SteppingHelixPropagatorAnalyzer.cc,v 1.12 2007/03/07 22:26:42 slava77 Exp $
 //
 //
 
@@ -34,14 +34,14 @@ positions of a muon in the detector.
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "DataFormats/Common/interface/Handle.h"
+#include "FWCore/Framework/interface/Handle.h"
 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "Utilities/Timing/interface/TimingReport.h"
 
-#include "DataFormats/GeometrySurface/interface/Cylinder.h"
-#include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "Geometry/Surface/interface/Cylinder.h"
+#include "Geometry/Surface/interface/Plane.h"
 
 #include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
 #include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"

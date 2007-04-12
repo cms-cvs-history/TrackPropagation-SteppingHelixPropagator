@@ -1,20 +1,20 @@
 /** \class SteppingHelixStateInfo
  *  Implementation part of the stepping helix propagator state data structure
  *
- *  $Date: 2007/02/05 18:48:08 $
- *  $Revision: 1.3 $
+ *  $Date: 2007/02/14 10:19:36 $
+ *  $Revision: 1.4 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Wed Jan  3 16:01:24 CST 2007
-// $Id: SteppingHelixStateInfo.cc,v 1.3 2007/02/05 18:48:08 slava77 Exp $
+// $Id: SteppingHelixStateInfo.cc,v 1.4 2007/02/14 10:19:36 slava77 Exp $
 //
 //
 
-#include "DataFormats/GeometryVector/interface/GlobalVector.h"
-#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
+#include "Geometry/Vector/interface/GlobalVector.h"
+#include "Geometry/Vector/interface/GlobalPoint.h"
 #include "TrackingTools/TrajectoryState/interface/FreeTrajectoryState.h"
 
 #include "TrackPropagation/SteppingHelixPropagator/interface/SteppingHelixStateInfo.h"
