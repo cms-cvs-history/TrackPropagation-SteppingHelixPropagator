@@ -12,7 +12,7 @@
 <use name=FWCore/PluginManager>
 <use name=FWCore/ParameterSet>
 <library file=SteppingHelixPropagatorAnalyzer.cc name=testSteppingHelixPropagatorAnalyzer>
-<flags SEAL_PLUGIN_NAME="testSteppingHelixPropagatorAnalyzer">
+<flags EDM_PLUGIN=1>
 </library>
 
 
