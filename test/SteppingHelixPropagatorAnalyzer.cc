@@ -17,7 +17,7 @@ positions of a muon in the detector.
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagatorAnalyzer.cc,v 1.11 2007/02/05 19:20:32 slava77 Exp $
+// $Id: SteppingHelixPropagatorAnalyzer.cc,v 1.12 2007/03/07 22:26:42 slava77 Exp $
 //
 //
 
@@ -159,6 +159,7 @@ class SteppingHelixPropagatorAnalyzer : public edm::EDAnalyzer {
   bool testPCAPropagation_;
 
   bool ntupleTkHits_;
+  std::string g4SimName_;
 };
 
 //
@@ -201,6 +202,8 @@ SteppingHelixPropagatorAnalyzer::SteppingHelixPropagatorAnalyzer(const edm::Para
   testPCAPropagation_ = iConfig.getParameter<bool>("testPCAPropagation");
 
   ntupleTkHits_ = iConfig.getParameter<bool>("ntupleTkHits");
+
+  g4SimName_ = iConfig.getParameter<std::string>("g4SimName");
 }
 
 void SteppingHelixPropagatorAnalyzer::beginJob(const edm::EventSetup& es){
@@ -500,7 +503,7 @@ void SteppingHelixPropagatorAnalyzer
 	      const edm::ESHandle<GlobalTrackingGeometry>& geom,
 	      std::vector<SteppingHelixPropagatorAnalyzer::GlobalSimHit>& hits) const {
   edm::Handle<edm::PSimHitContainer> handle;
-  iEvent.getByLabel("SimG4Object", instanceName, handle);
+  iEvent.getByLabel(g4SimName_, instanceName, handle);
   if (! handle.isValid() ){
     std::cout<<"No hits found"<<std::endl;
     return;
