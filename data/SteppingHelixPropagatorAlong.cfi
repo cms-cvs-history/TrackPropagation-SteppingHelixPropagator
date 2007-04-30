@@ -9,6 +9,8 @@ es_module SteppingHelixPropagatorAlong = SteppingHelixPropagatorESProducer
     bool NoErrorPropagation = false
     bool useMagVolumes = true
     bool useMatVolumes = true
+    bool returnTangentPlane = true
+    bool sendLogWarning = false
 
     //This sort of works but assumes a measurement at propagation origin  
     bool ApplyRadX0Correction = true
