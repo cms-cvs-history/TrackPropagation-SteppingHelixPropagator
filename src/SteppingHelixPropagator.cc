@@ -5,15 +5,15 @@
  *  to MC and (eventually) data. 
  *  Implementation file contents follow.
  *
- *  $Date: 2007/03/07 22:26:41 $
- *  $Revision: 1.30 $
+ *  $Date: 2007/03/13 22:34:14 $
+ *  $Revision: 1.31 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.cc,v 1.30 2007/03/07 22:26:41 slava77 Exp $
+// $Id: SteppingHelixPropagator.cc,v 1.31 2007/03/13 22:34:14 slava77 Exp $
 //
 //
 
@@ -305,9 +305,9 @@ SteppingHelixPropagator::propagate(SteppingHelixPropagator::DestType type,
   PropagationDirection refDirection = anyDirection;
   Result result = refToDest(type, (*svCurrent), pars, dist, tanDist, refDirection);
 
-  if (result != SteppingHelixStateInfo::OK ){
+  if (result != SteppingHelixStateInfo::OK || fabs(dist) > 1e12){
     svCurrent->status_ = result;
-    svCurrent->isValid_ = result == SteppingHelixStateInfo::OK;
+    svCurrent->isValid_ = false;
     svCurrent->field = field_;
     return result;
   }
@@ -332,6 +332,7 @@ SteppingHelixPropagator::propagate(SteppingHelixPropagator::DestType type,
   double oldDStep = 0;
   PropagationDirection oldRefDirection = propagationDirection();
 
+  int loopCount = 0;
   while (makeNextStep){
     dStep = defaultStep_;
     svCurrent = &svBuf_[cIndex_(nPoints_-1)];
@@ -458,16 +459,17 @@ SteppingHelixPropagator::propagate(SteppingHelixPropagator::DestType type,
       }
     }
 
-    if (nPoints_ > MAX_STEPS*1./defaultStep_ || nOsc > 6) result = SteppingHelixStateInfo::FAULT;
+    if (nPoints_ > MAX_STEPS*1./defaultStep_ || nOsc > 6 || loopCount > MAX_STEPS*100) result = SteppingHelixStateInfo::FAULT;
 
     if (svCurrent->p3.mag() < 0.1 ) result = SteppingHelixStateInfo::RANGEOUT;
 
-    if ( curR > 20000 || fabs(curZ) > 20000 ) result = SteppingHelixStateInfo::INACC;
+    if ( curR > 20000 || fabs(curZ) > 20000 || fabs(dist) > 1e5 ) result = SteppingHelixStateInfo::INACC;
 
     makeNextStep = result == SteppingHelixStateInfo::UNDEFINED;
     svCurrent->status_ = result;
     svCurrent->isValid_ = result == SteppingHelixStateInfo::OK;
     svCurrent->field = field_;
+    loopCount++;
   }
 
   if (debug_){
