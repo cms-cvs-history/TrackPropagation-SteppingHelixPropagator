@@ -1,0 +1,11 @@
+es_module SteppingHelixPropagatorL2Any = SteppingHelixPropagatorAny from "TrackPropagation/SteppingHelixPropagator/data/SteppingHelixPropagatorAny.cfi"
+replace SteppingHelixPropagatorL2Any.ComponentName = "SteppingHelixPropagatorL2Any"
+replace SteppingHelixPropagatorL2Any.useTuningForL2Speed = true
+
+es_module SteppingHelixPropagatorL2Any = SteppingHelixPropagatorAny from "TrackPropagation/SteppingHelixPropagator/data/SteppingHelixPropagatorAny.cfi"
+replace SteppingHelixPropagatorL2Along.ComponentName = "SteppingHelixPropagatorL2Along"
+replace SteppingHelixPropagatorL2Along.useTuningForL2Speed = true
+
+es_module SteppingHelixPropagatorL2Opposite = SteppingHelixPropagatorOpposite from "TrackPropagation/SteppingHelixPropagator/data/SteppingHelixPropagatorOpposite.cfi"
+replace SteppingHelixPropagatorL2Opposite.ComponentName = "SteppingHelixPropagatorL2Opposite"
+replace SteppingHelixPropagatorL2Opposite.useTuningForL2Speed = true
