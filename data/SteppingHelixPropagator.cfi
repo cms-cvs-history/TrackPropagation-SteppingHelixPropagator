@@ -8,7 +8,11 @@ es_module SteppingHelixPropagator = SteppingHelixPropagatorESProducer
     bool AssumeNoMaterial = false
     bool NoErrorPropagation = false
     bool useMagVolumes = true
+    bool useIsYokeFlag = true
     bool useMatVolumes = true
+    bool returnTangentPlane = true
+    bool sendLogWarning = false
+    bool useTuningForL2Speed = false
 
     //This sort of works but assumes a measurement at propagation origin  
     bool ApplyRadX0Correction = true

@@ -4,20 +4,20 @@
 // Class:      SteppingHelixPropagatorAnalyzer
 // 
 /**\class SteppingHelixPropagatorAnalyzer 
-Description: Analyzer of SteppingHelixPropagator performance
+   Description: Analyzer of SteppingHelixPropagator performance
 
-Implementation:
-Use simTracks and simVertices as initial points. For all  muon PSimHits in the event 
-extrapolate/propagate from the previous point (starting from a vertex) 
-to the hit position (detector surface).
-Fill an nTuple (could've been an EventProduct) with expected (given by the propagator) 
-and actual (PSimHits)
-positions of a muon in the detector.
+   Implementation:
+   Use simTracks and simVertices as initial points. For all  muon PSimHits in the event 
+   extrapolate/propagate from the previous point (starting from a vertex) 
+   to the hit position (detector surface).
+   Fill an nTuple (could've been an EventProduct) with expected (given by the propagator) 
+   and actual (PSimHits)
+   positions of a muon in the detector.
 */
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagatorAnalyzer.cc,v 1.12 2007/03/07 22:26:42 slava77 Exp $
+// $Id: SteppingHelixPropagatorAnalyzer.cc,v 1.12.4.1 2007/04/25 18:55:51 slava77 Exp $
 //
 //
 
@@ -89,7 +89,7 @@ positions of a muon in the detector.
 //
 
 class SteppingHelixPropagatorAnalyzer : public edm::EDAnalyzer {
- public:
+public:
   explicit SteppingHelixPropagatorAnalyzer(const edm::ParameterSet&);
   ~SteppingHelixPropagatorAnalyzer();
 
@@ -98,7 +98,7 @@ class SteppingHelixPropagatorAnalyzer : public edm::EDAnalyzer {
   virtual void endJob();
   void beginJob(edm::EventSetup const&);
 
- protected:
+protected:
   struct GlobalSimHit {
     const PSimHit* hit;
     const Surface* surf;
@@ -126,8 +126,8 @@ class SteppingHelixPropagatorAnalyzer : public edm::EDAnalyzer {
 		   const edm::ESHandle<GlobalTrackingGeometry>& geom,
 		   std::vector<SteppingHelixPropagatorAnalyzer::GlobalSimHit>& hits) const;
 
- private:
-// ----------member data ---------------------------
+private:
+  // ----------member data ---------------------------
   TFile* ntFile_;
   TTree* tr_;
 
@@ -150,11 +150,8 @@ class SteppingHelixPropagatorAnalyzer : public edm::EDAnalyzer {
 
   bool doneMapping_;
 
-  bool noMaterialMode_;
-  bool noErrPropMode_;
   bool radX0CorrectionMode_;
-
-  bool convertFromOldDTDetId_;
+  bool noErrPropMode_;
 
   bool testPCAPropagation_;
 
@@ -193,11 +190,8 @@ SteppingHelixPropagatorAnalyzer::SteppingHelixPropagatorAnalyzer(const edm::Para
 
   trkIndOffset_ = iConfig.getParameter<int>("trkIndOffset");
   debug_ = iConfig.getParameter<bool>("debug");
-  noMaterialMode_ = iConfig.getParameter<bool>("noMaterialMode");
-  noErrPropMode_ = iConfig.getParameter<bool>("noErrorPropagationMode");
   radX0CorrectionMode_ = iConfig.getParameter<bool>("radX0CorrectionMode");
-
-  convertFromOldDTDetId_ = iConfig.getParameter<bool>("convertFromOldDTDetId");
+  noErrPropMode_ = iConfig.getParameter<bool>("noErrorPropagationMode");
 
   testPCAPropagation_ = iConfig.getParameter<bool>("testPCAPropagation");
 
@@ -224,6 +218,7 @@ SteppingHelixPropagatorAnalyzer::~SteppingHelixPropagatorAnalyzer()
 void
 SteppingHelixPropagatorAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  static std::string metname = "SteppingHelixPropagatorAnalyzer";
   using namespace edm;
   ESHandle<MagneticField> bField;
   iSetup.get<IdealMagneticFieldRecord>().get(bField);
@@ -236,25 +231,25 @@ SteppingHelixPropagatorAnalyzer::analyze(const edm::Event& iEvent, const edm::Ev
   ESHandle<GlobalTrackingGeometry> geomESH;
   iSetup.get<GlobalTrackingGeometryRecord>().get(geomESH);
   if (debug_){
-    std::cout<<"Got GlobalTrackingGeometry "<<std::endl;
+    LogTrace(metname)<<"Got GlobalTrackingGeometry "<<std::endl;
   }
 
-//   ESHandle<CSCGeometry> cscGeomESH;
-//   iSetup.get<MuonGeometryRecord>().get(cscGeomESH);
-//   if (debug_){
-//     std::cout<<"Got CSCGeometry "<<std::endl;
-//   }
+  //   ESHandle<CSCGeometry> cscGeomESH;
+  //   iSetup.get<MuonGeometryRecord>().get(cscGeomESH);
+  //   if (debug_){
+  //     std::cout<<"Got CSCGeometry "<<std::endl;
+  //   }
 
-//   ESHandle<RPCGeometry> rpcGeomESH;
-//   iSetup.get<MuonGeometryRecord>().get(rpcGeomESH);
-//   if (debug_){
-//     std::cout<<"Got RPCGeometry "<<std::endl;
-//   }
+  //   ESHandle<RPCGeometry> rpcGeomESH;
+  //   iSetup.get<MuonGeometryRecord>().get(rpcGeomESH);
+  //   if (debug_){
+  //     std::cout<<"Got RPCGeometry "<<std::endl;
+  //   }
 
   run_ = (int)iEvent.id().run();
   event_ = (int)iEvent.id().event();
   if (debug_){
-    std::cout<<"Begin for run:event =="<<run_<<":"<<event_<<std::endl;
+    LogTrace(metname)<<"Begin for run:event =="<<run_<<":"<<event_<<std::endl;
   }
 
 
@@ -268,7 +263,7 @@ SteppingHelixPropagatorAnalyzer::analyze(const edm::Event& iEvent, const edm::Ev
     return;
   }
   if (debug_){
-    std::cout<<"Got simTracks of size "<< simTracks->size()<<std::endl;
+    LogTrace(metname)<<"Got simTracks of size "<< simTracks->size()<<std::endl;
   }
 
   Handle<SimVertexContainer> simVertices;
@@ -278,7 +273,7 @@ SteppingHelixPropagatorAnalyzer::analyze(const edm::Event& iEvent, const edm::Ev
     return;
   }
   if (debug_){
-    std::cout<<"Got simVertices of size "<< simVertices->size()<<std::endl;
+    LogTrace(metname)<<"Got simVertices of size "<< simVertices->size()<<std::endl;
   }
 
 
@@ -302,7 +297,7 @@ SteppingHelixPropagatorAnalyzer::analyze(const edm::Event& iEvent, const edm::Ev
     int trkPDG = tracksCI->type();
     if (abs(trkPDG) != 13 ) {
       if (debug_){
-	std::cout<<"Skip "<<trkPDG<<std::endl;
+	LogTrace(metname)<<"Skip "<<trkPDG<<std::endl;
       }
       continue;
     }
@@ -371,20 +366,20 @@ SteppingHelixPropagatorAnalyzer::analyze(const edm::Event& iEvent, const edm::Ev
 	const PSimHit* iHit = simHitsCI->second->hit;
 
 	if (debug_){
-	  std::cout<< igHit->id.rawId()
-		   <<" r3L:"<<iHit->localPosition()
-		   <<" r3G:"<<igHit->r3
-		   <<" p3L:"<<iHit->momentumAtEntry()
-		   <<" p3G:"<<igHit->p3
-		   <<" pId:"<<iHit->particleType()
-		   <<" tId:"<<iHit->trackId()
-		   <<std::endl;
+	  LogTrace(metname)<< igHit->id.rawId()
+			   <<" r3L:"<<iHit->localPosition()
+			   <<" r3G:"<<igHit->r3
+			   <<" p3L:"<<iHit->momentumAtEntry()
+			   <<" p3G:"<<igHit->p3
+			   <<" pId:"<<iHit->particleType()
+			   <<" tId:"<<iHit->trackId()
+			   <<std::endl;
 	}
 
 	if (debug_){
-	  std::cout<<"Will propagate to surface: "
-		   <<igHit->surf->position()
-		   <<" "<<igHit->surf->rotation()<<std::endl;
+	  LogTrace(metname)<<"Will propagate to surface: "
+			   <<igHit->surf->position()
+			   <<" "<<igHit->surf->rotation()<<std::endl;
 	}
 	pStatus = 0;
 	if (radX0CorrectionMode_ ){
@@ -418,14 +413,14 @@ SteppingHelixPropagatorAnalyzer::analyze(const edm::Event& iEvent, const edm::Ev
 	
 
 	if (debug_){
-	  std::cout<<"Got to "
-		   <<" r3Prp:"<<r3F
-		   <<" r3Hit:"<<igHit->r3
-		   <<" p3Prp:"<<p3F
-		   <<" p3Hit:"<<igHit->p3
-		   <<" pPrp:"<<p3F.mag()
-		   <<" pHit:"<<igHit->p3.mag()
-		   <<std::endl;
+	  LogTrace(metname)<<"Got to "
+			   <<" r3Prp:"<<r3F
+			   <<" r3Hit:"<<igHit->r3
+			   <<" p3Prp:"<<p3F
+			   <<" p3Hit:"<<igHit->p3
+			   <<" pPrp:"<<p3F.mag()
+			   <<" pHit:"<<igHit->p3.mag()
+			   <<std::endl;
 	}
 	loadNtVars(nPoints_, 0, pStatus, igHit->id.rawId(), 
 		   p3F, r3F, igHit->p3, igHit->r3, charge, covF); nPoints_++;
@@ -502,6 +497,7 @@ void SteppingHelixPropagatorAnalyzer
 	      const std::string instanceName, 
 	      const edm::ESHandle<GlobalTrackingGeometry>& geom,
 	      std::vector<SteppingHelixPropagatorAnalyzer::GlobalSimHit>& hits) const {
+  static std::string metname = "SteppingHelixPropagatorAnalyzer";
   edm::Handle<edm::PSimHitContainer> handle;
   iEvent.getByLabel(g4SimName_, instanceName, handle);
   if (! handle.isValid() ){
@@ -509,21 +505,13 @@ void SteppingHelixPropagatorAnalyzer
     return;
   }
   if (debug_){
-    std::cout<<"Got "<<instanceName<<" of size "<< handle->size()<<std::endl;
+    LogTrace(metname)<<"Got "<<instanceName<<" of size "<< handle->size()<<std::endl;
   }  
 
   edm::PSimHitContainer::const_iterator pHits_CI = handle->begin();
   for (; pHits_CI != handle->end(); pHits_CI++){
     int dtId = pHits_CI->detUnitId(); 
     DetId wId(dtId);
-    if (wId.det() == DetId::Muon && wId.subdetId() == MuonSubdetId::DT
-	&& convertFromOldDTDetId_){
-      int wh = ( (dtId>>22) & 0x7 );
-      int sec = ( (dtId>>15) & 0xF );
-      int sta = ( (dtId>>19) & 0x7 );
-      int newId = (dtId & ~0x1ff8000) | (wh<<15) | (sec<<18) | (sta<<22);
-      wId = DetId(newId);
-    }
 
     const GeomDet* layer = geom->idToDet(wId);
 
