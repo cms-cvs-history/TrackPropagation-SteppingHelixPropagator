@@ -5,15 +5,15 @@
  *  to MC and (eventually) data. 
  *  Implementation file contents follow.
  *
- *  $Date: 2007/05/12 10:00:32 $
- *  $Revision: 1.31.4.1 $
+ *  $Date: 2007/05/17 00:41:59 $
+ *  $Revision: 1.31.4.2 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.cc,v 1.31.4.1 2007/05/12 10:00:32 slava77 Exp $
+// $Id: SteppingHelixPropagator.cc,v 1.31.4.2 2007/05/17 00:41:59 slava77 Exp $
 //
 //
 
@@ -430,6 +430,12 @@ SteppingHelixPropagator::propagate(SteppingHelixPropagator::DestType type,
       tanDistMin = fabs(tanDistMat)+0.05;     //try to step into the next volume
       if (expectNewMagVolume) expectNewMagVolume = false;
     }
+
+    if (tanDistMin*fabs(svCurrent->dEdx) > 0.5*svCurrent->p3.mag()){
+      tanDistMin = 0.5*svCurrent->p3.mag()/fabs(svCurrent->dEdx);
+      if (expectNewMagVolume) expectNewMagVolume = false;
+    }
+
     if (fabs(tanDistMin) < dStep){
       dStep = fabs(tanDistMin); 
       if (type == POINT_PCA_DT || type == LINE_PCA_DT){
@@ -834,6 +840,11 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
       MatBounds rzTmp;
       dEdx = getDeDx(svNext, dEdXPrime, radX0, rzTmp);
       dP = dEdx*dS;      
+      if (debug_){
+	LogTrace(metname)<<"New dEdX= "<<dEdx
+			 <<" dP= "<<dP
+			 <<" for p0 "<<p0<<std::endl;
+      }
     }
     //p0 is mid-way and b0 from mid-point
     p0 += dP/2.; p0 = p0 < 1e-2 ? 1e-2 : p0;
@@ -1021,8 +1032,11 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 
   double pMag = svCurrent.p3.mag();
 
-  if (dir == oppositeToMomentum) dP = -fabs(dP);
-  dP = dP > pMag ? pMag-1e-5 : dP;
+  if (dir == oppositeToMomentum) dP = fabs(dP);
+  else if( dP < 0) { //the case of negative dP
+    dP = -dP > pMag ? -pMag+1e-5 : dP;
+  }
+  
   getNextState(svCurrent, svNext, dP, tauNext, drVec, dS, dS/radX0,
 	       dCTransform_);
   return true;
@@ -1652,7 +1666,7 @@ SteppingHelixPropagator::refToMagVolume(const SteppingHelixPropagator::StateInfo
 
     double sign = dir == alongMomentum ? 1. : -1.;
     Point gPointEst(sv.r3);
-    Vector lDelta(sv.p3); lDelta *= 1./sv.p3.mag()*sign*sqrt(fabs(distToFace[iFDest]*tanDistToFace[iFDest]));
+    Vector lDelta(sv.p3); lDelta *= 1./sv.p3.mag()*sign*fabs(distToFace[iFDest]);
     gPointEst += lDelta;
     if (debug_){
       LogTrace(metname)<<"Linear est point "<<gPointEst
@@ -1678,8 +1692,9 @@ SteppingHelixPropagator::refToMagVolume(const SteppingHelixPropagator::StateInfo
     double sign = dir == alongMomentum ? 1. : -1.;
 
     //check if it's a wrong volume situation
-    if (nDestSorted-nearParallels > 0) result = SteppingHelixStateInfo::WRONG_VOLUME;
-    else {//get here if all faces in the corr direction were skipped
+    if (nDestSorted-nearParallels > 0 ) result = SteppingHelixStateInfo::WRONG_VOLUME;
+    else {
+      //get here if all faces in the corr direction were skipped
       Point gPointEst(sv.r3);
       double lDist = fabs(distToFace[iDistMin]);
       if (lDist > fastSkipDist) lDist = fastSkipDist;
