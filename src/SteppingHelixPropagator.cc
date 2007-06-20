@@ -5,15 +5,15 @@
  *  to MC and (eventually) data. 
  *  Implementation file contents follow.
  *
- *  $Date: 2007/05/12 10:00:32 $
- *  $Revision: 1.31.4.1 $
+ *  $Date: 2007/06/20 09:42:00 $
+ *  $Revision: 1.31.4.1.2.1 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.cc,v 1.31.4.1 2007/05/12 10:00:32 slava77 Exp $
+// $Id: SteppingHelixPropagator.cc,v 1.31.4.1.2.1 2007/06/20 09:42:00 slava77 Exp $
 //
 //
 
@@ -248,6 +248,7 @@ void SteppingHelixPropagator::setIState(const SteppingHelixStateInfo& sStart) co
     setIState(sStart.p3, sStart.r3, sStart.q, 
 	      !noErrorPropagation_ ? sStart.cov : HepSymMatrix(1,0),
 	      propagationDirection());
+    if (fillStateCovTransform_ ) svBuf_[cIndex_(0)].covTransform_ = sStart.covTransform_;
   }
 }
 
@@ -618,7 +619,9 @@ void SteppingHelixPropagator::getNextState(const SteppingHelixPropagator::StateI
   if (svPrevious.cov.num_row() >=5){
     svNext.cov = svPrevious.cov.similarity(dCovTransform);
     svNext.cov += svPrevious.matDCov;
-    if (fillStateCovTransform_ ) svNext.covTransform_ = dCovTransform*svPrevious.covTransform_;
+    if (fillStateCovTransform_ ){
+      svNext.covTransform_ = dCovTransform*svPrevious.covTransform_;
+    }
   } else {
     svNext.cov.assign(svPrevious.cov);
   }
