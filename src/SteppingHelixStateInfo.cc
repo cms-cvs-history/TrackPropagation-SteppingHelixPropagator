@@ -1,15 +1,15 @@
 /** \class SteppingHelixStateInfo
  *  Implementation part of the stepping helix propagator state data structure
  *
- *  $Date: 2007/02/05 18:48:08 $
- *  $Revision: 1.3 $
+ *  $Date: 2007/02/14 10:19:36 $
+ *  $Revision: 1.4 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Wed Jan  3 16:01:24 CST 2007
-// $Id: SteppingHelixStateInfo.cc,v 1.3 2007/02/05 18:48:08 slava77 Exp $
+// $Id: SteppingHelixStateInfo.cc,v 1.4 2007/02/14 10:19:36 slava77 Exp $
 //
 //
 
@@ -19,6 +19,7 @@
 
 #include "TrackPropagation/SteppingHelixPropagator/interface/SteppingHelixStateInfo.h"
 
+#include "CLHEP/Matrix/DiagMatrix.h"
 
 SteppingHelixStateInfo::SteppingHelixStateInfo(const FreeTrajectoryState& fts){
   p3.set(fts.momentum().x(), fts.momentum().y(), fts.momentum().z());
@@ -27,6 +28,8 @@ SteppingHelixStateInfo::SteppingHelixStateInfo(const FreeTrajectoryState& fts){
 
   if (fts.hasError()) cov = fts.cartesianError().matrix();
   else cov = HepSymMatrix(1, 0);
+
+  covTransform_ = HepDiagMatrix(6,1);
 
   isComplete = false;
   isValid_ = true;

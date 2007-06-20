@@ -5,15 +5,15 @@
  *  to MC and (eventually) data. 
  *  Implementation file contents follow.
  *
- *  $Date: 2007/03/13 22:34:14 $
- *  $Revision: 1.31 $
+ *  $Date: 2007/05/12 10:00:32 $
+ *  $Revision: 1.31.4.1 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.cc,v 1.31 2007/03/13 22:34:14 slava77 Exp $
+// $Id: SteppingHelixPropagator.cc,v 1.31.4.1 2007/05/12 10:00:32 slava77 Exp $
 //
 //
 
@@ -56,6 +56,7 @@ SteppingHelixPropagator::SteppingHelixPropagator(const MagneticField* field,
   applyRadX0Correction_ = false;
   useMagVolumes_ = false;
   useMatVolumes_ = false;
+  fillStateCovTransform_ = false;
   for (int i = 0; i <= MAX_POINTS; i++){
     svBuf_[i].cov = HepSymMatrix(6,0);
     svBuf_[i].matDCov = HepSymMatrix(6,0);
@@ -617,6 +618,7 @@ void SteppingHelixPropagator::getNextState(const SteppingHelixPropagator::StateI
   if (svPrevious.cov.num_row() >=5){
     svNext.cov = svPrevious.cov.similarity(dCovTransform);
     svNext.cov += svPrevious.matDCov;
+    if (fillStateCovTransform_ ) svNext.covTransform_ = dCovTransform*svPrevious.covTransform_;
   } else {
     svNext.cov.assign(svPrevious.cov);
   }
@@ -633,6 +635,7 @@ void SteppingHelixPropagator::getNextState(const SteppingHelixPropagator::StateI
 	     <<std::endl;
     LogTrace(metname)<<"New Covariance "<<svNext.cov<<std::endl;
     LogTrace(metname)<<"Transf by dCovTransform "<<dCovTransform<<std::endl;
+    if (fillStateCovTransform_) LogTrace(metname)<<"Full covTransform since start "<<svNext.covTransform_<<std::endl;
   }
 }
 

@@ -58,6 +58,9 @@ SteppingHelixPropagatorESProducer::produce(const TrackingComponentsRecord & iRec
   bool useMatVolumes = pset_.getParameter<bool>("useMatVolumes");
   shProp->setUseMatVolumes(useMatVolumes);
 
+  bool fillStateCovTransform = pset_.getParameter<bool>("fillStateCovTransform");
+  shProp->setFillStateCovTransform(fillStateCovTransform);
+  
   _propagator  = boost::shared_ptr<Propagator>(shProp);
   return _propagator;
 }

@@ -6,15 +6,15 @@
 /** \class SteppingHelixStateInfo
  *  Holder of SteppingHelixState information
  *
- *  $Date: 2007/02/06 20:49:17 $
- *  $Revision: 1.6 $
+ *  $Date: 2007/02/14 06:16:46 $
+ *  $Revision: 1.7 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Wed Jan  3 16:01:24 CST 2007
-// $Id: SteppingHelixStateInfo.h,v 1.6 2007/02/06 20:49:17 slava77 Exp $
+// $Id: SteppingHelixStateInfo.h,v 1.7 2007/02/14 06:16:46 slava77 Exp $
 //
 //
 
@@ -52,6 +52,7 @@ class SteppingHelixStateInfo {
   SteppingHelixStateInfo(const FreeTrajectoryState& fts);
 
   TrajectoryStateOnSurface getStateOnSurface(const Surface& surf) const;
+  const HepMatrix& getCovTransform() const { return covTransform_;}
 
   ///convert internal structure into the fts
   void getFreeState(FreeTrajectoryState& fts) const;
@@ -93,6 +94,8 @@ class SteppingHelixStateInfo {
   Vector bfGradLoc;
   const MagVolume* magVol;
   const MagneticField* field;  
+
+  HepMatrix covTransform_;
 
   VolumeBounds rzLims;
   double dEdx;

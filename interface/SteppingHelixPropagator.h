@@ -9,15 +9,15 @@
  *  Material effects (multiple scattering and energy loss) are based on tuning
  *  to MC and (eventually) data. 
  *
- *  $Date: 2007/02/14 06:16:46 $
- *  $Revision: 1.15 $
+ *  $Date: 2007/02/14 10:21:11 $
+ *  $Revision: 1.16 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.h,v 1.15 2007/02/14 06:16:46 slava77 Exp $
+// $Id: SteppingHelixPropagator.h,v 1.16 2007/02/14 10:21:11 slava77 Exp $
 //
 //
 
@@ -161,6 +161,9 @@ class SteppingHelixPropagator : public Propagator {
   ///Switch to using Material Volumes .. internally defined for now
   void setUseMatVolumes(bool val){ useMatVolumes_ = val;}
 
+  //! Switch to fill full covariance transform in StateInfo
+  void setFillStateCovTransform(bool val){ fillStateCovTransform_ = val;}
+
  protected:
   typedef SteppingHelixStateInfo::VolumeBounds MatBounds;
   /// (Internals) Init starting point
@@ -251,6 +254,8 @@ class SteppingHelixPropagator : public Propagator {
   bool applyRadX0Correction_;
   bool useMagVolumes_;
   bool useMatVolumes_;
+
+  bool fillStateCovTransform_;
 
   double defaultStep_;
 };
