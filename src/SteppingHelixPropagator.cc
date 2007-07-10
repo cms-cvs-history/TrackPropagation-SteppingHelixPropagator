@@ -5,15 +5,15 @@
  *  to MC and (eventually) data. 
  *  Implementation file contents follow.
  *
- *  $Date: 2007/03/13 22:34:14 $
- *  $Revision: 1.31 $
+ *  $Date: 2007/05/12 10:00:32 $
+ *  $Revision: 1.31.4.1 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.cc,v 1.31 2007/03/13 22:34:14 slava77 Exp $
+// $Id: SteppingHelixPropagator.cc,v 1.31.4.1 2007/05/12 10:00:32 slava77 Exp $
 //
 //
 
@@ -240,8 +240,8 @@ void SteppingHelixPropagator::setIState(const FreeTrajectoryState& ftsStart) con
 
 void SteppingHelixPropagator::setIState(const SteppingHelixStateInfo& sStart) const {
   nPoints_ = 0;
+  svBuf_[cIndex_(nPoints_)] = sStart; //do it to get a fresh start
   if (sStart.isComplete ) {
-    svBuf_[cIndex_(nPoints_)] = sStart;
     nPoints_++;
   } else {
     setIState(sStart.p3, sStart.r3, sStart.q, 
@@ -557,6 +557,7 @@ void SteppingHelixPropagator::loadState(SteppingHelixPropagator::StateInfo& svCu
   svCurrent.cov.assign(cov);
 
   svCurrent.isComplete = true;
+  svCurrent.isValid_ = true;
 
   if (debug_){
     LogTrace(metname)<<"Loaded at  path: "<<svCurrent.path_<<" radPath: "<<svCurrent.radPath
