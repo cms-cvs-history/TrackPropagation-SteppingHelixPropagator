@@ -10,6 +10,11 @@ es_module SteppingHelixPropagatorAny = SteppingHelixPropagatorESProducer
     bool useMagVolumes = true
     bool useIsYokeFlag = true
     bool useMatVolumes = true
+
+    bool useInTeslaFromMagField = false
+    bool SetVBFPointer = false
+    string VBFName = "VolumeBasedMagneticField"
+
     bool returnTangentPlane = true
     bool sendLogWarning = false
     bool useTuningForL2Speed = false
