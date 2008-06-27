@@ -21,4 +21,9 @@ es_module SteppingHelixPropagatorOpposite = SteppingHelixPropagatorESProducer
 
     //This sort of works but assumes a measurement at propagation origin  
     bool ApplyRadX0Correction = true
+
+    bool useEndcapShiftsInZ = false
+    double endcapShiftInZPos = 0
+    double endcapShiftInZNeg = 0
+
 }
