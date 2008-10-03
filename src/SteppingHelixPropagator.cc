@@ -5,15 +5,15 @@
  *  to MC and (eventually) data. 
  *  Implementation file contents follow.
  *
- *  $Date: 2008/04/23 02:59:17 $
- *  $Revision: 1.50 $
+ *  $Date: 2008/06/16 04:53:26 $
+ *  $Revision: 1.50.2.1 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.cc,v 1.50 2008/04/23 02:59:17 slava77 Exp $
+// $Id: SteppingHelixPropagator.cc,v 1.50.2.1 2008/06/16 04:53:26 slava77 Exp $
 //
 //
 
@@ -382,6 +382,11 @@ SteppingHelixPropagator::propagate(SteppingHelixPropagator::DestType type,
       dir = refDirection;
     } else {
       dir = propagationDirection();
+      if (fabs(tanDist)<0.1 && refDirection != dir){
+	nOsc++;
+	dir = refDirection;
+	if (debug_) LogTrace(metname)<<"NOTE: overstepped last time: switch direction (can do it if within 1 mm)"<<std::endl;
+      }
     }
 
     if (useMagVolumes_ && ! (fabs(dist) < fabs(epsilon))){//need to know the general direction
