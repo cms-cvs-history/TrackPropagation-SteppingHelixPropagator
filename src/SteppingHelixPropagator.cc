@@ -5,15 +5,15 @@
  *  to MC and (eventually) data. 
  *  Implementation file contents follow.
  *
- *  $Date: 2009/06/12 14:59:40 $
- *  $Revision: 1.63 $
+ *  $Date: 2009/08/04 18:44:08 $
+ *  $Revision: 1.63.2.1 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.cc,v 1.63 2009/06/12 14:59:40 slava77 Exp $
+// $Id: SteppingHelixPropagator.cc,v 1.63.2.1 2009/08/04 18:44:08 slava77 Exp $
 //
 //
 
@@ -30,6 +30,9 @@
 #include "DataFormats/GeometrySurface/interface/Cone.h"
 
 #include "TrackingTools/GeomPropagators/interface/PropagationExceptions.h"
+
+#include "TrackingTools/AnalyticalJacobians/interface/JacobianCartesianToCurvilinear.h"
+#include "TrackingTools/AnalyticalJacobians/interface/JacobianCurvilinearToCartesian.h"
 
 #include "TrackPropagation/SteppingHelixPropagator/interface/SteppingHelixPropagator.h"
 
@@ -849,6 +852,15 @@ void SteppingHelixPropagator::getNextState(const SteppingHelixPropagator::StateI
 		     <<std::endl;
     LogTrace(metname)<<"New Covariance "<<svNext.cov<<std::endl;
     LogTrace(metname)<<"Transf by dCovTransform "<<dCovTransform<<std::endl;
+    GlobalVector p3GV(svNext.p3.x(), svNext.p3.y(), svNext.p3.z());
+    GlobalPoint r3GP(svNext.r3.x(), svNext.r3.y(), svNext.r3.z());
+    GlobalVector p3GVprev(svPrevious.p3.x(), svPrevious.p3.y(), svPrevious.p3.z());
+    GlobalPoint r3GPprev(svPrevious.r3.x(), svPrevious.r3.y(), svPrevious.r3.z());
+    GlobalTrajectoryParameters tParsNext(r3GP, p3GV, svNext.q, svNext.field);
+    GlobalTrajectoryParameters tParsPrevious(r3GPprev, p3GVprev, svNext.q, svNext.field);
+
+    
+    LogTrace(metname)<<"Transf by dCovTransformCurv\n "<<  JacobianCartesianToCurvilinear(tParsNext).jacobian()*(dCovTransform*JacobianCurvilinearToCartesian(tParsPrevious).jacobian()) <<std::endl;
     LogTrace(metname)<<"New Covariance Curv"<<svNext.covCurv<<std::endl;
     LogTrace(metname)<<"Transf by dCovTransform "<<dCovCurvTransform<<std::endl;
     FreeTrajectoryState fts; svNext.getFreeState(fts);
@@ -1119,7 +1131,9 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 	// Origin: TRPRFN
 	double t11 = tau.x(); double t12 = tau.y(); double t13 = tau.z();
 	double t21 = tauNext.x(); double t22 = tauNext.y(); double t23 = tauNext.z();
-	double cosl0 = tau.perp(); double cosl1 = 1./tauNext.perp();
+	double cosl0 = tau.perp(); 
+	//	double cosl1 = 1./tauNext.perp(); //not quite a cos .. it's a cosec--> change to cosecl1 below
+	double cosecl1 = 1./tauNext.perp();
 	//AlgebraicMatrix a(5,5,1);
 	// define average magnetic field and gradient 
 	// at initial point - inlike TRPRFN
@@ -1131,6 +1145,7 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 	double theta = -phi; double sint = -sinPhi; double cost = cosPhi;
 	double hn1 = hn.x(); double hn2 = hn.y(); double hn3 = hn.z();
 	double dx1 = dx.x(); double dx2 = dx.y(); double dx3 = dx.z();
+	double hnDt1 = hn1*t11 + hn2*t12 + hn3*t13;
 	double gamma = hn1*t21 + hn2*t22 + hn3*t23;
 	double an1 = hn2*t23 - hn3*t22;
 	double an2 = hn3*t21 - hn1*t23;
@@ -1148,7 +1163,7 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 	// moved up (where -h.mag() is needed()
 	//   double qp = q*pp;
 	double anv = -(hn1*u21 + hn2*u22          );
-	double anu =  (hn1*v21 + hn2*v22 + hn3*v23);
+	double anu =  (hn1*v21 + hn2*v22 + hn3*v23); 
 	double omcost = oneLessCosPhi; double tmsint = -phi*phiLessSinPhiOPhi;
   
 	double hu1 =         - hn3*u12;
@@ -1164,7 +1179,10 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
   
 	//   lambda
   
-	dCCurvTransform_(1,0) = -qp*anv*(t21*dx1 + t22*dx2 + t23*dx3);
+	dCCurvTransform_(1,0) = phi*p0/svCurrent.q*cosecl1*
+	  (sinPhi*bbtVec.z() - cosPhi*btVec.z());
+	//was dCCurvTransform_(1,0) = -qp*anv*(t21*dx1 + t22*dx2 + t23*dx3); //NOTE (SK) this was found to have an opposite sign
+	//from independent re-calculation ... in fact the tauNext.dot.dR piece isnt reproduced 
   
 	dCCurvTransform_(1,1) = cost*(v11*v21 + v12*v22 + v13*v23) +
 	  sint*(hv1*v21 + hv2*v22 + hv3*v23) +
@@ -1183,13 +1201,17 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 	       tmsint*gamma*(hn1*u11 + hn2*u12          ) );
 	dCCurvTransform_(1,2) *= cosl0;
 
-	dCCurvTransform_(1,3) = -q*anv*(u11*t21 + u12*t22          );
-
-	dCCurvTransform_(1,4) = -q*anv*(v11*t21 + v12*t22 + v13*t23);
+	// Commented out in part for reproducibility purposes: these terms are zero in cart->curv 
+	//	dCCurvTransform_(1,3) = -q*anv*(u11*t21 + u12*t22          ); //don't show up in cartesian setup-->curv
+	//why would lambdaNext depend explicitely on initial position ? any arbitrary init point can be chosen not 
+	// affecting the final state's momentum direction ... is this the field gradient in curvilinear coord?
+	//	dCCurvTransform_(1,4) = -q*anv*(v11*t21 + v12*t22 + v13*t23); //don't show up in cartesian setup-->curv
 
 	//   phi
 
-	dCCurvTransform_(2,0) = -qp*anu*(t21*dx1 + t22*dx2 + t23*dx3)*cosl1;
+	dCCurvTransform_(2,0) = - phi*p0/svCurrent.q*cosecl1*cosecl1*
+	  (oneLessCosPhi*bHat.z()*btVec.mag2() + sinPhi*btVec.z() + cosPhi*tbtVec.z()) ;
+	//was 	dCCurvTransform_(2,0) = -qp*anu*(t21*dx1 + t22*dx2 + t23*dx3)*cosecl1;
 
 	dCCurvTransform_(2,1) = cost*(v11*u21 + v12*u22          ) +
 	  sint*(hv1*u21 + hv2*u22          ) +
@@ -1198,7 +1220,7 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 	  anu*(-sint*(v11*t21 + v12*t22 + v13*t23) +
 	       omcost*(v11*an1 + v12*an2 + v13*an3) -
 	       tmsint*gamma*(hn1*v11 + hn2*v12 + hn3*v13) );
-	dCCurvTransform_(2,1) *= cosl1;
+	dCCurvTransform_(2,1) *= cosecl1;
 
 	dCCurvTransform_(2,2) = cost*(u11*u21 + u12*u22          ) +
 	  sint*(hu1*u21 + hu2*u22          ) +
@@ -1207,18 +1229,21 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 	  anu*(-sint*(u11*t21 + u12*t22          ) +
 	       omcost*(u11*an1 + u12*an2          ) -
 	       tmsint*gamma*(hn1*u11 + hn2*u12          ) );
-	dCCurvTransform_(2,2) *= cosl1*cosl0;
+	dCCurvTransform_(2,2) *= cosecl1*cosl0;
 
-	dCCurvTransform_(2,3) = -q*anu*(u11*t21 + u12*t22          )*cosl1;
-
-	dCCurvTransform_(2,4) = -q*anu*(v11*t21 + v12*t22 + v13*t23)*cosl1;
+	// Commented out in part for reproducibility purposes: these terms are zero in cart->curv 
+	// dCCurvTransform_(2,3) = -q*anu*(u11*t21 + u12*t22          )*cosecl1;
+	//why would lambdaNext depend explicitely on initial position ? any arbitrary init point can be chosen not 
+	// affecting the final state's momentum direction ... is this the field gradient in curvilinear coord?
+	// dCCurvTransform_(2,4) = -q*anu*(v11*t21 + v12*t22 + v13*t23)*cosecl1;
 
 	//   yt
 
 	double pp = 1./qbp;
-	dCCurvTransform_(3,0) = pp*(u21*dx1 + u22*dx2            );
-	dCCurvTransform_(4,0) = pp*(v21*dx1 + v22*dx2 + v23*dx3);
-
+	// (SK) these terms seem to consistently have a sign opp from private derivation
+	dCCurvTransform_(3,0) = - pp*(u21*dx1 + u22*dx2            ); //NB: modified from the original: changed the sign
+	dCCurvTransform_(4,0) = - pp*(v21*dx1 + v22*dx2 + v23*dx3);  
+	
 
 	dCCurvTransform_(3,1) = (sint*(v11*u21 + v12*u22          ) +
 			    omcost*(hv1*u21 + hv2*u22          ) +
@@ -1303,7 +1328,7 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
       svCurrent.matDCov(2,5) = mulRP*(rep.lY.z()*rep.lY.z() + rep.lZ.z()*rep.lZ.z());
       
       //curvilinear
-      double absTanTheta = tauNext.perp();
+      double sinTheta = tauNext.perp();
       double p0Mat = p0+ 0.5*dP; // FIXME change this to p0 after it's clear that there's agreement in everything else
       // with 6x6 formulation
       svCurrent.matDCovCurv(0,0) = losPP/p0Mat/p0Mat/p0Mat/p0Mat;
@@ -1320,13 +1345,13 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 
       svCurrent.matDCovCurv(2,0) = 0;
       svCurrent.matDCovCurv(2,1) = 0;
-      svCurrent.matDCovCurv(2,2) = mulPP/p0Mat/p0Mat/absTanTheta/absTanTheta;
-      svCurrent.matDCovCurv(2,3) = mulRP/p0Mat/absTanTheta;
+      svCurrent.matDCovCurv(2,2) = mulPP/p0Mat/p0Mat/sinTheta/sinTheta;
+      svCurrent.matDCovCurv(2,3) = mulRP/p0Mat/sinTheta;
       svCurrent.matDCovCurv(2,4) = 0;
 
       svCurrent.matDCovCurv(3,0) = 0;
       svCurrent.matDCovCurv(3,1) = 0;
-      svCurrent.matDCovCurv(3,2) = mulRP/p0Mat/absTanTheta;
+      svCurrent.matDCovCurv(3,2) = mulRP/p0Mat/sinTheta;
       svCurrent.matDCovCurv(3,0) = 0;
       svCurrent.matDCovCurv(3,3) = mulRR;
       svCurrent.matDCovCurv(3,4) = 0;
@@ -1778,11 +1803,17 @@ SteppingHelixPropagator::refToDest(SteppingHelixPropagator::DestType dest,
 	double bVal = lVec.dot(nPlane)/tN;
 	if (fabs(aVal*bVal)< 0.3){
 	  double cVal = - sv.bf.cross(lVec).dot(nPlane)/b0/tN; //1- bHat_n*bHat_tau/tau_n;
-	  double tanDCorr = bVal/2. + (bVal*bVal/2. + cVal/6)*aVal; 
-	  tanDCorr *= aVal;
-	  //+ (-bVal/24. + 0.625*bVal*bVal*bVal + 5./12.*bVal*cVal)*aVal*aVal*aVal
-	  if (debug_) LogTrace(metname)<<tanDist<<" vs "<<tanDist*(1.+tanDCorr)<<" corr "<<tanDist*tanDCorr<<std::endl;
-	  tanDist *= (1.+tanDCorr);
+          double aacVal = cVal*aVal*aVal;
+          if (fabs(aacVal)<1){
+            double tanDCorr = bVal/2. + (bVal*bVal/2. + cVal/6)*aVal;
+            tanDCorr *= aVal;
+            //+ (-bVal/24. + 0.625*bVal*bVal*bVal + 5./12.*bVal*cVal)*aVal*aVal*aVal
+            if (debug_) LogTrace(metname)<<tanDist<<" vs "<<tanDist*(1.+tanDCorr)<<" corr "<<tanDist*tanDCorr<<std::endl;
+            tanDist *= (1.+tanDCorr);
+          } else {
+            if (debug_) LogTrace(metname)<<"AACVal "<< fabs(aacVal)
+                                         <<" = "<<aVal<<"**2 * "<<cVal<<" too large:: will not converge"<<std::endl;
+          }
 	} else {
 	  if (debug_) LogTrace(metname)<<"ABVal "<< fabs(aVal*bVal)
 				       <<" = "<<aVal<<" * "<<bVal<<" too large:: will not converge"<<std::endl;
