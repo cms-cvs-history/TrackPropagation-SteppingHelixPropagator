@@ -1,15 +1,15 @@
 /** \class SteppingHelixStateInfo
  *  Implementation part of the stepping helix propagator state data structure
  *
- *  $Date: 2009/08/04 18:44:08 $
- *  $Revision: 1.12.2.1 $
+ *  $Date: 2009/09/08 18:25:33 $
+ *  $Revision: 1.12.2.2 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Wed Jan  3 16:01:24 CST 2007
-// $Id: SteppingHelixStateInfo.cc,v 1.12.2.1 2009/08/04 18:44:08 slava77 Exp $
+// $Id: SteppingHelixStateInfo.cc,v 1.12.2.2 2009/09/08 18:25:33 slava77 Exp $
 //
 //
 
@@ -42,18 +42,16 @@ SteppingHelixStateInfo::SteppingHelixStateInfo(const FreeTrajectoryState& fts):
   q = fts.charge();
 
   if (fts.hasError()){
-    cov = fts.cartesianError().matrix();
     covCurv = fts.curvilinearError().matrix();
     hasErrorPropagated_ = true;
   } else {
-    cov = AlgebraicSymMatrix66();
     covCurv = AlgebraicSymMatrix55();
     hasErrorPropagated_ = false;
   }
   static const std::string metname = "SteppingHelixPropagator";
   if (fts.hasError()){ 
     LogTrace(metname)<<"Created SHPStateInfo from FTS\n"<<fts;
-    LogTrace(metname)<<"and cartesian error of\n"<<fts.cartesianError().matrix();
+    //    LogTrace(metname)<<"and cartesian error of\n"<<fts.cartesianError().matrix();
   }
   else LogTrace(metname)<<"Created SHPStateInfo from FTS without errors";
 
@@ -69,12 +67,12 @@ TrajectoryStateOnSurface SteppingHelixStateInfo::getStateOnSurface(const Surface
   GlobalVector p3GV(p3.x(), p3.y(), p3.z());
   GlobalPoint r3GP(r3.x(), r3.y(), r3.z());
   GlobalTrajectoryParameters tPars(r3GP, p3GV, q, field);
-  CartesianTrajectoryError tCov(cov);
+  //  CartesianTrajectoryError tCov(cov);
 
-  CurvilinearTrajectoryError tCCov(ROOT::Math::Similarity(JacobianCartesianToCurvilinear(tPars).jacobian(), cov));
-  //  CurvilinearTrajectoryError tCCov(covCurv);
+  //  CurvilinearTrajectoryError tCCov(ROOT::Math::Similarity(JacobianCartesianToCurvilinear(tPars).jacobian(), cov));
+  CurvilinearTrajectoryError tCCov(covCurv);
 
-  FreeTrajectoryState fts(tPars, tCov, tCCov);
+  FreeTrajectoryState fts(tPars, tCCov);
   if (! hasErrorPropagated_) fts = FreeTrajectoryState(tPars);
 
 
@@ -90,12 +88,12 @@ void SteppingHelixStateInfo::getFreeState(FreeTrajectoryState& fts) const {
     GlobalVector p3GV(p3.x(), p3.y(), p3.z());
     GlobalPoint r3GP(r3.x(), r3.y(), r3.z());
     GlobalTrajectoryParameters tPars(r3GP, p3GV, q, field);
-    CartesianTrajectoryError tCov(cov);
-    CurvilinearTrajectoryError tCCov(ROOT::Math::Similarity(JacobianCartesianToCurvilinear(tPars).jacobian(), cov));
-    //    CurvilinearTrajectoryError tCCov(covCurv);
+    //    CartesianTrajectoryError tCov(cov);
+    //    CurvilinearTrajectoryError tCCov(ROOT::Math::Similarity(JacobianCartesianToCurvilinear(tPars).jacobian(), cov));
+    CurvilinearTrajectoryError tCCov(covCurv);
     
     fts = (hasErrorPropagated_ ) 
-      ? FreeTrajectoryState(tPars, tCov,tCCov) : FreeTrajectoryState(tPars);
+      ? FreeTrajectoryState(tPars, tCCov) : FreeTrajectoryState(tPars);
     //      ? FreeTrajectoryState(tPars, tCov, tCCov) : FreeTrajectoryState(tPars);
     //    if (fts.hasError()) fts.curvilinearError(); //call it so it gets created
   }

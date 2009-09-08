@@ -9,15 +9,15 @@
  *  Material effects (multiple scattering and energy loss) are based on tuning
  *  to MC and (eventually) data. 
  *
- *  $Date: 2009/05/26 08:11:34 $
- *  $Revision: 1.27 $
+ *  $Date: 2009/08/04 18:44:08 $
+ *  $Revision: 1.27.2.1 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.h,v 1.27 2009/05/26 08:11:34 fabiocos Exp $
+// $Id: SteppingHelixPropagator.h,v 1.27.2.1 2009/08/04 18:44:08 slava77 Exp $
 //
 //
 
@@ -212,7 +212,7 @@ class SteppingHelixPropagator : public Propagator {
   void loadState(SteppingHelixPropagator::StateInfo& svCurrent, 
 		 const SteppingHelixPropagator::Vector& p3, 
 		 const SteppingHelixPropagator::Point& r3, int charge,
-		 const AlgebraicSymMatrix66& cov, PropagationDirection dir,
+		 PropagationDirection dir,
 		 const AlgebraicSymMatrix55& covCurv) const;
 
   //! (Internals) compute transients for current point (increments step counter).
@@ -222,7 +222,7 @@ class SteppingHelixPropagator : public Propagator {
 		    double dP, 
 		    const SteppingHelixPropagator::Vector& tau, const SteppingHelixPropagator::Vector& drVec, 
 		    double dS, double dX0,
-		    const AlgebraicMatrix66& dCov, const AlgebraicMatrix55& dCovCurv) const;
+		    const AlgebraicMatrix55& dCovCurv) const;
   
   //! Set/compute basis vectors for local coordinates at current step (called by incrementState)
   void setRep(SteppingHelixPropagator::Basis& rep,
@@ -273,14 +273,11 @@ class SteppingHelixPropagator : public Propagator {
 
   StateInfo invalidState_;
 
-  mutable AlgebraicMatrix66 covRot_;
-  mutable AlgebraicMatrix66 dCTransform_;
   mutable AlgebraicMatrix55 covCurvRot_;
   mutable AlgebraicMatrix55 dCCurvTransform_;
 
   const MagneticField* field_;
   const VolumeBasedMagneticField* vbField_;
-  const AlgebraicSymMatrix66 unit66_;
   const AlgebraicSymMatrix55 unit55_;
   bool debug_;
   bool noMaterialMode_;
