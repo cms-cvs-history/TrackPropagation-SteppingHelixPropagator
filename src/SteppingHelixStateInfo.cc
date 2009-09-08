@@ -1,15 +1,15 @@
 /** \class SteppingHelixStateInfo
  *  Implementation part of the stepping helix propagator state data structure
  *
- *  $Date: 2008/12/04 00:27:03 $
- *  $Revision: 1.12 $
+ *  $Date: 2009/08/04 18:44:08 $
+ *  $Revision: 1.12.2.1 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Wed Jan  3 16:01:24 CST 2007
-// $Id: SteppingHelixStateInfo.cc,v 1.12 2008/12/04 00:27:03 slava77 Exp $
+// $Id: SteppingHelixStateInfo.cc,v 1.12.2.1 2009/08/04 18:44:08 slava77 Exp $
 //
 //
 
@@ -92,7 +92,6 @@ void SteppingHelixStateInfo::getFreeState(FreeTrajectoryState& fts) const {
     GlobalTrajectoryParameters tPars(r3GP, p3GV, q, field);
     CartesianTrajectoryError tCov(cov);
     CurvilinearTrajectoryError tCCov(ROOT::Math::Similarity(JacobianCartesianToCurvilinear(tPars).jacobian(), cov));
-
     //    CurvilinearTrajectoryError tCCov(covCurv);
     
     fts = (hasErrorPropagated_ ) 
