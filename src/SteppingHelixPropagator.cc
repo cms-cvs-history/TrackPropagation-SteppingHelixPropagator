@@ -5,15 +5,15 @@
  *  to MC and (eventually) data. 
  *  Implementation file contents follow.
  *
- *  $Date: 2009/08/12 04:04:29 $
- *  $Revision: 1.64 $
+ *  $Date: 2009/08/19 15:49:30 $
+ *  $Revision: 1.65 $
  *  \author Vyacheslav Krutelyov (slava77)
  */
 
 //
 // Original Author:  Vyacheslav Krutelyov
 //         Created:  Fri Mar  3 16:01:24 CST 2006
-// $Id: SteppingHelixPropagator.cc,v 1.64 2009/08/12 04:04:29 slava77 Exp $
+// $Id: SteppingHelixPropagator.cc,v 1.65 2009/08/19 15:49:30 slava77 Exp $
 //
 //
 
@@ -1013,7 +1013,7 @@ bool SteppingHelixPropagator::makeAtomStep(SteppingHelixPropagator::StateInfo& s
 
     bHat = bf; bHat *= 1./bHat.mag();
     btVec = bHat.cross(tau);
-    double tauB = tau.dot(bf);
+    double tauB = tau.dot(bHat);
     bbtVec = bHat*tauB - tau;//bHat.cross(btVec);
 
     tauNext = bbtVec*oneLessCosPhi; tauNext -= btVec*sinPhi;     tauNext += tau; 
