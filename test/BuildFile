@@ -1,3 +1,4 @@
+<use name=TrackingTools/Records>
 <use name=root>
 <use name=clhep>
 <use name=TrackPropagation/SteppingHelixPropagator>
